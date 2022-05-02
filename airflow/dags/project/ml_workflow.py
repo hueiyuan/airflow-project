@@ -57,7 +57,7 @@ general_config = config = loadconfig.config(service_name=service_name,
 
 project_config = loadconfig.config(service_name=service_name,
                                    config_folder_prefix='config',
-                                   config_prefix_name='sms')._load()
+                                   config_prefix_name='ml')._load()
 
 config = general_config.copy()
 config.update(project_config)
