@@ -7,11 +7,11 @@ from airflow import DAG, version
 from airflow.models import Variable
 from airflow.providers.docker.operators.docker import DockerOperator
 
-
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.amazon.aws.operators.athena import AWSAthenaOperator
 
 ### custom lib
+from custom.airflow.operators.athena import AWSAthenaForQueriesOperator
 from project import airflow_utils
 
 env = Variable.get('environment')
@@ -30,20 +30,38 @@ def generate_dq_config(table):
 
     return config
 
+def list_sqls(folder):
+    abs_folder = os.path.join(os.path.split(__file__)[0], folder)
+    if not os.path.exists(abs_folder) or not os.path.isdir(abs_folder):
+        return
+
+    sqls = sorted(os.path.join(folder, item)
+                  for item in os.listdir(abs_folder)
+                  if item.endswith('.sql'))
+    return sqls or None
 
 """ 
     dag tasks 
 """
 
-
 def add_analyzer_athena_partition(table, sqls, params):
     athena_result_config = {
         'OutputLocation': Variable.get('s3temp_uri_fmt') + '/athena/data_quality/' + table
     }
-
+    
+    ### if you have multiple sql, can use AWSAthenaForQueriesOperator
+    
+    # dag_template_update_athena = list_sqls(os.path.join('templates', 'update_athena'))
+    # task_update_athena = AWSAthenaForQueriesOperator(
+    #    task_id='{}-update-athena'.format(dag_backup_table),
+    #    database='db_name',
+    #    queries=dag_template_update_athena,
+    #    output_location=athena_result_config['OutputLocation'],
+    #    params=params)
+    
     analyzer_athena_partition = AWSAthenaOperator(
         task_id='add_analyze_partition',
-        database='data_quality',
+        database='db_name',
         query=sqls,
         output_location=athena_result_config['OutputLocation'],
         params=params,
