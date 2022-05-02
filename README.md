@@ -1,2 +1,2 @@
-# airflow-template (TBD)
-the repo includes my experience about airflow dag implementation
+# airflow-project
+the repo includes all dags about my project and experience.
