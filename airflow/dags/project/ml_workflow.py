@@ -107,7 +107,7 @@ def get_deploy_files(**kwargs):
     xcom_value = ti.xcom_pull(task_ids='list_deploy_files')
     deploy_files = [
         'model_lib', 'general_config', 'custom_config', 'bootstrap',
-        'sms_0_data_preprocessing']
+        'data_preprocessing']
     deploy_json = dict()
     for v in xcom_value:
         for f in deploy_files:
