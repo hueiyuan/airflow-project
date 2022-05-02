@@ -23,7 +23,7 @@ aws_conn_id = 'production-aws' if env == 'production' or env == 'staging' else '
 subdag_pool = 'subdag-pool'
 
 DEFAULT_ARGS = {
-    'owner': 'bruce.lin',
+    'owner': 'mars.su',
     'depends_on_past': False,
     'email': ['hueiyuansu@gmail.com'],
     'email_on_failure': False,
