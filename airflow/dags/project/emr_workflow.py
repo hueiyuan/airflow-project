@@ -12,6 +12,7 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.subdag import SubDagOperator
 
 from project import airflow_utils
+from project.emr_spec import emr_cluster_spec
 
 IS_PRODUCTION = Variable.get('environment') == 'production'
 ARGS_PARAMS = {'is_production': IS_PRODUCTION}
@@ -47,7 +48,7 @@ with DAG(
     # [START howto_operator_emr_manual_steps_tasks]
     create_cluster = EmrCreateJobFlowOperator(
         task_id='create_job_flow',
-        job_flow_overrides=JOB_FLOW_OVERRIDES,
+        job_flow_overrides=emr_cluster_spec.JOB_FLOW_OVERRIDES,
         aws_conn_id=aws_conn_id,
         emr_conn_id='emr_default',
         params={
@@ -59,7 +60,7 @@ with DAG(
         task_id='add_convert_steps',
         job_flow_id="{{ task_instance.xcom_pull(task_ids='create_job_flow', key='return_value') }}",
         aws_conn_id=aws_conn_id,
-        steps=SPARK_CONVERT_STEPS,
+        steps=emr_cluster_spec.SPARK_STEPS,
         params={
             'env': env
         }
