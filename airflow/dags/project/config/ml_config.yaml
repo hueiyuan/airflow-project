@@ -1,0 +1,111 @@
+project_name: sms
+seed: 9527
+maximum_records_size: 100000
+sms:
+  data_splitter:
+    use_multi_class_mode: True
+    use_smart_batching: True
+    tokens_length_restricts: 7
+    bleu_score_restricts: 5
+  wandb_ssm_name: /ssm/service/ml/weights-biases/mars/apikey
+  model_update_cycle:
+    period_day_range: 7
+  region:
+    - TW
+  labeling_data_setting:
+    period_day_range: 180
+  model_trust_data_setting:
+    period_day_range: 28
+  dev:
+    data_folder: serve-dev/sms/data
+    tf_model_folder: serve-dev/sms/tf_model
+    tf_lite_folder: serve-dev/sms/tf_lite_model
+    deploy_folder: serve-dev/sms/deploy
+    prediction_folder: serve-dev/sms/prediction
+    labeling_service_folder: serve-dev/sms/labeling_service
+    ml_engine_output_folder: serve-dev/sms/ml-engine
+  staging:
+    data_folder: serve-staging/sms/data
+    tf_model_folder: serve-staging/sms/tf_model
+    tf_lite_folder: serve-staging/sms/tf_lite_model
+    deploy_folder: serve-staging/sms/deploy
+    prediction_folder: serve-staging/sms/prediction
+    labeling_service_folder: serve-staging/sms/labeling_service
+    ml_engine_output_folder: serve-staging/sms/ml-engine
+  production:
+    data_folder: serve/sms/data
+    tf_model_folder: serve/sms/tf_model
+    tf_lite_folder: serve/sms/tf_lite_model
+    deploy_folder: serve/sms/deploy
+    prediction_folder: serve/sms/prediction
+    labeling_service_folder: serve/sms/labeling_service
+    ml_engine_output_folder: serve/sms/ml-enginee
+  output_data_folder_categ:
+    cleaned_data: cleaned_data
+    preprocessing_data: preprocessing_data
+
+labebling_service:
+  collect_date_period: 7
+  source_data_limitation:
+    use_limitation_cond: True
+    limitation_size: 20000
+  dev:
+    labeled_data: serve-dev/sms/labeling_service
+  staging:
+    labeled_data: serve-staging/sms/labeling_service
+  production:
+    labeled_data: serve/sms/labeling_service
+
+classifier_model:
+  pretrained_model_name_or_path: voidful/albert_chinese_tiny
+  tensorboard_log_folder:  /tmp/tensorboard_log
+  checkpoint_folder: /tmp/checkpoint
+  save_tf_model_folder: /tmp/saved_tf_model
+  save_lite_model_folder: /tmp/saved_lite_model
+  cached_pretrain_model_folder: /tmp/cache_pretrain_model
+  preprocessing_data_folder: /tmp/preprocessing_data
+  prediction_data_folder: /tmp/prediction_data
+
+aws_service_spec:
+  emr_spark_cluster:
+      ReleaseLabel: "emr-6.4.0"
+      LogUri: "s3://aws-logs-473024607515-ap-northeast-1/elasticmapreduce/"
+      master: 
+        InstanceType: "r5.xlarge"
+        InstanceCount: 1
+        SizeInGB: 100
+      slave-core:
+        InstanceType: "r5.2xlarge"
+        InstanceCount: 1
+        SizeInGB: 300
+      slave-task:
+        InstanceType: "r5.2xlarge"
+        InstanceCount: 1
+        SizeInGB: 300
+      Ec2KeyName: "my_aws_pem"
+      Ec2SubnetId: "subnet-XXXX"
+      EmrManagedSlaveSecurityGroup: "sg-XXXX"
+      EmrManagedMasterSecurityGroup: "sg-XXXX"
+
+gcp_ml_engine_spec:
+  pythonVersion: "3.7"
+  runtimeVersion: "2.4"
+  region: "asia-east1"
+  TW:
+    train_config:
+      scaleTier: "CUSTOM"
+      masterType: "complex_model_m_p100"
+    pred_config:
+      scaleTier: "CUSTOM"
+      masterType: "standard_gpu"
+    labeling_config:
+      scaleTier: "CUSTOM"
+      masterType: "standard"
+
+gcp_ml_engine:
+  dev:
+    output_job_dir: serve-dev/sms/ml-engine-job
+  staging:
+    output_job_dir: serve-staging/sms/ml-engine-job
+  production:
+    output_job_dir: serve/sms/ml-engine-job
